@@ -24,6 +24,38 @@ class Config():
             for repo in GIT_REPOS:
                 Repo.clone_from(repo, self.themes_folder, depth=1, single_branch=True)
 
+    def get_toml_configs(self):
+        try:
+            with open(self.config_path, 'r') as file:
+                data = toml.load(file)
+        except FileNotFoundError:
+            data = {}
+        return data
+
+    def write_toml_configs(self, data):
+        with open(self.config_path, 'w') as file:
+            toml.dump(data, file)
+        
+    def plus_opacity(self, val=0.1):
+        data = self.get_toml_configs()
+        wind = data['window'] if 'window' in data else {'opacity': 1.0}
+
+        if wind['opacity'] >= 1.0:
+            return
+        wind['opacity'] = wind['opacity'] + val
+        data['window'] = wind
+        self.write_toml_configs(data)
+
+    def minus_opacity(self, val=0.1):
+        data = self.get_toml_configs()
+        wind = data['window'] if 'window' in data else {'opacity': 1.0}
+
+        if wind['opacity'] <= 0.0:
+            return
+        wind['opacity'] = wind['opacity'] - val
+        data['window'] = wind
+        self.write_toml_configs(data)
+
     def reset(self):
         with open(self.config_path, 'w') as file:
             toml.dump(self.original, file)
@@ -49,11 +81,7 @@ class Config():
         return toml_files, realpaths
 
     def update_toml_file(self, string_variable):
-        try:
-            with open(self.config_path, 'r') as file:
-                data = toml.load(file)
-        except FileNotFoundError:
-            data = {}
+        data = self.get_toml_configs()
 
         if 'import' not in data:
             data['import'] = []
@@ -65,10 +93,7 @@ class Config():
 
         # Add the new value
         data['import'].append(string_variable)
-
-        with open(self.config_path, 'w') as file:
-            toml.dump(data, file)
-
+        self.write_toml_configs(data)
 
     def find_alacritty_config_path(self):
         """
@@ -99,7 +124,3 @@ class Config():
                 return config_path
 
         return None
-
-
-if __name__ == "__main__":
-    update_toml_file("test")
