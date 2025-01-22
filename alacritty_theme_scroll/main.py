@@ -1,9 +1,9 @@
 import curses
 
-from configlib import Config
+from .configlib import Config
 
 
-def main(stdscr):
+def _ui_logic(stdscr):
     conf = Config()
     items, realpaths = conf.find_toml_files()
 
@@ -63,5 +63,6 @@ def main(stdscr):
     # End Loop
     conf.reset()
 
-if __name__ == "__main__":
-    curses.wrapper(main)
+
+def run():
+    curses.wrapper(_ui_logic)
