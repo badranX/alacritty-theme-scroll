@@ -7,6 +7,8 @@ def _ui_logic(stdscr):
     conf = Config()
     db, realpaths = conf.find_toml_files()
     realpaths = {k: v for k,v in zip(db, realpaths)}
+    realpaths['default'] = 'default'
+    db = ['default'] + db
     items = db
 
     curses.curs_set(0)
@@ -14,6 +16,7 @@ def _ui_logic(stdscr):
     current_index = 0
     search_query = ""
 
+    conf.update_toml_file(realpaths[db[0]])
     while True:
         stdscr.clear()
         stdscr.addstr(0, 0, "Left/Right arrow to decrease/increase opacity.")
@@ -43,8 +46,11 @@ def _ui_logic(stdscr):
             conf.plus_opacity()
         elif key == curses.KEY_LEFT:
             conf.minus_opacity()
-        elif key == ord('q'):
-            break
+        elif key == 23:
+            search_query = ""
+            current_index = 0
+            items = db
+            conf.update_toml_file(realpaths[db[0]])
         elif key == ord('\n'):
             conf.update_toml_file(realpaths[items[current_index]])
             stdscr.clear()
@@ -53,7 +59,7 @@ def _ui_logic(stdscr):
             stdscr.getch()
             return
         elif key == 27:  # Escape key to clear search
-            search_query = ""
+            break
         elif key in range(32, 127):  # Add printable characters to search query
             search_query += chr(key)
             matching_indices = [item for item in db if search_query.lower() in item.lower()]
@@ -69,6 +75,10 @@ def _ui_logic(stdscr):
                     conf.update_toml_file(realpaths[matching_indices[0]])
                     current_index = 0
                     items = matching_indices
+            else:
+                current_index = 0
+                items = db
+                conf.update_toml_file(realpaths[db[0]])
     # End Loop
     conf.reset()
 

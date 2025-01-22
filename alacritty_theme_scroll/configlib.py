@@ -92,7 +92,8 @@ class Config():
         data['import'] = [item for item in data['import'] if str(self.themes_folder) not in item]
 
         # Add the new value
-        data['import'].append(string_variable)
+        if string_variable != 'default':
+            data['import'].append(string_variable)
         self.write_toml_configs(data)
 
     def find_alacritty_config_path(self):
