@@ -2,11 +2,25 @@ import toml
 from pathlib import Path
 import os
 
-from git import Repo
+from tqdm import tqdm
+from git import Repo, RemoteProgress
 
 
 THEMES_FOLDER = 'cli_alacritty_themes'
-GIT_REPOS = ['https://github.com/alacritty/alacritty-theme']
+GIT_REPOS = {'alacritty-theme': 'https://github.com/alacritty/alacritty-theme',
+             'catppuccin-soothing': 'https://github.com/catppuccin/alacritty'}
+
+
+#stackoverflow Cosmos Zhu answer
+class CloneProgress(RemoteProgress):
+    def __init__(self):
+        super().__init__()
+        self.pbar = tqdm()
+
+    def update(self, op_code, cur_count, max_count=None, message=''):
+        self.pbar.total = max_count
+        self.pbar.n = cur_count
+        self.pbar.refresh()
 
 
 class Config():
@@ -19,10 +33,12 @@ class Config():
             self.themes_folder = os.path.join(config_dir, THEMES_FOLDER)
 
         if not os.path.exists(self.themes_folder):
+            print('cloning themes in ', self.themes_folder)
+            print('please wait...')
             os.makedirs(self.themes_folder)
-            print('a theme folder was created: ', self.themes_folder)
-            for repo in GIT_REPOS:
-                Repo.clone_from(repo, self.themes_folder, depth=1, single_branch=True)
+            for name, repo in GIT_REPOS.items():
+                repo_path = os.path.join(self.themes_folder, name)
+                Repo.clone_from(repo, repo_path, depth=1, single_branch=True, progress=CloneProgress())
 
     def get_toml_configs(self):
         try:

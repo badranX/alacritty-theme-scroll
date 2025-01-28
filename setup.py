@@ -8,7 +8,7 @@ setup(
     author_email='techtweaking@gmail.com',
     description='pick your alacritty theme by scrolling and live updating',
     url='https://github.com/badranx/alacritty-theme-scroll',
-    install_requires=['GitPython >=3.1.42', 'toml'],
+    install_requires=['GitPython >=3.1.42', 'toml', 'tqdm'],
     packages = [package for package in find_packages() if package.startswith("alacritty_theme_scroll")],
     entry_points={
     'console_scripts': [
