@@ -3,12 +3,16 @@ import curses
 from .configlib import Config
 
 
+NO_CHANGE = "NONE"
+
 def _ui_logic(stdscr):
     conf = Config()
     db, realpaths = conf.find_toml_files()
     realpaths = {k: v for k,v in zip(db, realpaths)}
-    realpaths['default'] = 'default'
-    db = ['default'] + db
+    extra = [NO_CHANGE, 'default']
+    realpaths[extra[0]] = extra[0]
+    realpaths[extra[1]] = extra[1]
+    db = extra + db
     items = db
 
     curses.curs_set(0)
@@ -52,9 +56,11 @@ def _ui_logic(stdscr):
             items = db
             conf.update_toml_file(realpaths[db[0]])
         elif key == ord('\n'):
-            conf.update_toml_file(realpaths[items[current_index]])
+            chosen_item = items[current_index]
+            if chosen_item != NO_CHANGE:
+                conf.update_toml_file(realpaths[chosen_item])
             stdscr.clear()
-            stdscr.addstr(0, 0, f"You selected: {items[current_index]}\n")
+            stdscr.addstr(0, 0, f"You selected: {chosen_item}\n")
             stdscr.refresh()
             stdscr.getch()
             return
