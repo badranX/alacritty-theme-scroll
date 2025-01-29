@@ -24,7 +24,7 @@ def _ui_logic(stdscr):
     while True:
         stdscr.clear()
         stdscr.addstr(0, 0, "Left/Right arrow to decrease/increase opacity.")
-        stdscr.addstr(1,0, "Please, select your item: \n")
+        stdscr.addstr(1,0, "Please, select your theme: \n")
         stdscr.addstr(2, 0, f"Search: {search_query}\n")
         start_index = max(0, current_index - 3)
         end_index = min(len(items), current_index + 4)
