@@ -12,7 +12,7 @@ setup(
     packages = [package for package in find_packages() if package.startswith("alacritty_theme_scroll")],
     entry_points={
     'console_scripts': [
-        'alacritty_theme_scroll = alacritty_theme_scroll.main:run',
+        'alacritty-scroll = alacritty_theme_scroll.main:run',
     ],},
     license='MIT',
     classifiers = [
