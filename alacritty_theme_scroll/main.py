@@ -5,11 +5,12 @@ from .configlib import Config
 
 NO_CHANGE = "NONE"
 
+
 def _ui_logic(stdscr):
     conf = Config()
     db, realpaths = conf.find_toml_files()
-    realpaths = {k: v for k,v in zip(db, realpaths)}
-    extra = [NO_CHANGE, 'default']
+    realpaths = {k: v for k, v in zip(db, realpaths)}
+    extra = [NO_CHANGE, "default"]
     realpaths[extra[0]] = extra[0]
     realpaths[extra[1]] = extra[1]
     db = extra + db
@@ -24,7 +25,7 @@ def _ui_logic(stdscr):
     while True:
         stdscr.clear()
         stdscr.addstr(0, 0, "Left/Right arrow to decrease/increase opacity.")
-        stdscr.addstr(1,0, "Please, select your theme: \n")
+        stdscr.addstr(1, 0, "Please, select your theme: \n")
         stdscr.addstr(2, 0, f"Search: {search_query}\n")
         start_index = max(0, current_index - 3)
         end_index = min(len(items), current_index + 4)
@@ -55,7 +56,7 @@ def _ui_logic(stdscr):
             current_index = 0
             items = db
             conf.update_toml_file(realpaths[db[0]])
-        elif key == ord('\n'):
+        elif key == ord("\n"):
             chosen_item = items[current_index]
             if chosen_item != NO_CHANGE:
                 conf.update_toml_file(realpaths[chosen_item])
@@ -68,7 +69,9 @@ def _ui_logic(stdscr):
             break
         elif key in range(32, 127):  # Add printable characters to search query
             search_query += chr(key)
-            matching_indices = [item for item in db if search_query.lower() in item.lower()]
+            matching_indices = [
+                item for item in db if search_query.lower() in item.lower()
+            ]
             if matching_indices:
                 conf.update_toml_file(realpaths[matching_indices[0]])
                 current_index = 0
@@ -76,7 +79,9 @@ def _ui_logic(stdscr):
         elif key == curses.KEY_BACKSPACE or key == 127:  # Handle backspace
             search_query = search_query[:-1]
             if search_query:
-                matching_indices = [item for item in db if search_query.lower() in item.lower()]
+                matching_indices = [
+                    item for item in db if search_query.lower() in item.lower()
+                ]
                 if matching_indices:
                     conf.update_toml_file(realpaths[matching_indices[0]])
                     current_index = 0

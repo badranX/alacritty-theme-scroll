@@ -6,74 +6,82 @@ from tqdm import tqdm
 from git import Repo, RemoteProgress
 
 
-THEMES_FOLDER = 'cli_alacritty_themes'
-GIT_REPOS = {'alacritty-theme': 'https://github.com/alacritty/alacritty-theme',
-             'catppuccin-soothing': 'https://github.com/catppuccin/alacritty'}
+THEMES_FOLDER = "cli_alacritty_themes"
+GIT_REPOS = {
+    "alacritty-theme": "https://github.com/alacritty/alacritty-theme",
+    "catppuccin-soothing": "https://github.com/catppuccin/alacritty",
+}
 
 
-#stackoverflow Cosmos Zhu answer
+# stackoverflow Cosmos Zhu answer
 class CloneProgress(RemoteProgress):
     def __init__(self):
         super().__init__()
         self.pbar = tqdm()
 
-    def update(self, op_code, cur_count, max_count=None, message=''):
+    def update(self, op_code, cur_count, max_count=None, message=""):
         self.pbar.total = max_count
         self.pbar.n = cur_count
         self.pbar.refresh()
 
 
-class Config():
+class Config:
     def __init__(self):
         self.config_path = self.find_alacritty_config_path()
-        with open(self.config_path, 'r') as file:
+        with open(self.config_path, "r") as file:
             self.original = toml.load(file)
             self.config_path = self.find_alacritty_config_path()
             config_dir = os.path.abspath(os.path.dirname(self.config_path))
             self.themes_folder = os.path.join(config_dir, THEMES_FOLDER)
 
         if not os.path.exists(self.themes_folder):
-            print('cloning themes in ', self.themes_folder)
-            print('please wait...')
+            print("cloning themes in ", self.themes_folder)
+            print("please wait...")
             os.makedirs(self.themes_folder)
             for name, repo in GIT_REPOS.items():
                 repo_path = os.path.join(self.themes_folder, name)
-                Repo.clone_from(repo, repo_path, depth=1, single_branch=True, progress=CloneProgress())
+                Repo.clone_from(
+                    repo,
+                    repo_path,
+                    depth=1,
+                    single_branch=True,
+                    progress=CloneProgress(),
+                )
 
     def get_toml_configs(self):
         try:
-            with open(self.config_path, 'r') as file:
+            with open(self.config_path, "r") as file:
                 data = toml.load(file)
         except FileNotFoundError:
             data = {}
         return data
 
     def write_toml_configs(self, data):
-        with open(self.config_path, 'w') as file:
+        with open(self.config_path, "w") as file:
             toml.dump(data, file)
-        
+
     def plus_opacity(self, val=0.1):
         data = self.get_toml_configs()
-        wind = data['window'] if 'window' in data else {'opacity': 1.0}
+        wind = data["window"] if "window" in data else {"opacity": 1.0}
 
-        if wind['opacity'] >= 1.0:
+        if wind["opacity"] >= 1.0:
             return
-        wind['opacity'] = wind['opacity'] + val
-        data['window'] = wind
+        wind["opacity"] = wind["opacity"] + val
+        data["window"] = wind
         self.write_toml_configs(data)
 
     def minus_opacity(self, val=0.1):
         data = self.get_toml_configs()
-        wind = data['window'] if 'window' in data else {'opacity': 1.0}
+        wind = data["window"] if "window" in data else {"opacity": 1.0}
 
-        if wind['opacity'] <= 0.0:
+        if wind["opacity"] <= 0.0:
             return
-        wind['opacity'] = wind['opacity'] - val
-        data['window'] = wind
+        wind["opacity"] = wind["opacity"] - val
+        data["window"] = wind
         self.write_toml_configs(data)
 
     def reset(self):
-        with open(self.config_path, 'w') as file:
+        with open(self.config_path, "w") as file:
             toml.dump(self.original, file)
 
     def find_toml_files(self):
@@ -99,17 +107,21 @@ class Config():
     def update_toml_file(self, string_variable):
         data = self.get_toml_configs()
 
-        if 'import' not in data:
-            data['import'] = []
+        if "import" not in data:
+            data["import"] = []
 
-        if not isinstance(data['import'], list):
-            raise Exception("The 'import' keyword in the configs is expected to be a list")
+        if not isinstance(data["import"], list):
+            raise Exception(
+                "The 'import' keyword in the configs is expected to be a list"
+            )
 
-        data['import'] = [item for item in data['import'] if str(self.themes_folder) not in item]
+        data["import"] = [
+            item for item in data["import"] if str(self.themes_folder) not in item
+        ]
 
         # Add the new value
-        if string_variable != 'default':
-            data['import'].append(string_variable)
+        if string_variable != "default":
+            data["import"].append(string_variable)
         self.write_toml_configs(data)
 
     def find_alacritty_config_path(self):
@@ -121,20 +133,26 @@ class Config():
         """
         config_locations = []
 
-        if os.name == 'nt':  # Windows
-            appdata = os.getenv('APPDATA')
+        if os.name == "nt":  # Windows
+            appdata = os.getenv("APPDATA")
             if appdata:
-                config_locations.append(os.path.join(appdata, 'alacritty', 'alacritty.toml'))
+                config_locations.append(
+                    os.path.join(appdata, "alacritty", "alacritty.toml")
+                )
         else:  # UNIX-based systems
-            xdg_config_home = os.getenv('XDG_CONFIG_HOME', os.path.join(Path.home(), '.config'))
+            xdg_config_home = os.getenv(
+                "XDG_CONFIG_HOME", os.path.join(Path.home(), ".config")
+            )
             home = str(Path.home())
 
-            config_locations.extend([
-                os.path.join(xdg_config_home, 'alacritty', 'alacritty.toml'),
-                os.path.join(xdg_config_home, 'alacritty.toml'),
-                os.path.join(home, '.config', 'alacritty', 'alacritty.toml'),
-                os.path.join(home, '.alacritty.toml')
-            ])
+            config_locations.extend(
+                [
+                    os.path.join(xdg_config_home, "alacritty", "alacritty.toml"),
+                    os.path.join(xdg_config_home, "alacritty.toml"),
+                    os.path.join(home, ".config", "alacritty", "alacritty.toml"),
+                    os.path.join(home, ".alacritty.toml"),
+                ]
+            )
 
         for config_path in config_locations:
             if os.path.isfile(config_path):
